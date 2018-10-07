@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ajax</title>
+</head>
+<body>
+<h1>ajax</h1>
+<script>
+    var ajax = function(method, path, data, reseponseCallback) {
+    var r = new XMLHttpRequest()
+    // 设置请求方法和请求地址
+    r.open(method, path, true)
+    // 设置发送的数据的格式为 application/json
+    // 这个不是必须的
+    r.setRequestHeader('Content-Type', 'application/json')
+    // 注册响应函数
+    r.onreadystatechange = function() {
+        if(r.readyState === 4) {
+            // r.response 存的就是服务器发过来的放在 HTTP BODY 中的数据
+            reseponseCallback(r.response)
+        }
+    }
+    // 把数据转换为 json 格式字符串
+    data = JSON.stringify(data)
+    // 发送请求
+    r.send(data)
+}
+
+    var loadTodos = function() {
+        var baseUrl = 'http://localhost:5000'
+        var method = 'POST'
+        var path = '/api/set_temp'
+        var url = baseUrl + path
+        // var data = 'todo=吃瓜&time=2018'
+        var data = {'todo':'茶馆'}
+        ajax(method, url, data, function(r){
+            console.log('收到服务器响应的数据', r)
+            // insertTodos(todos)
+        })
+    }
+loadTodos()
+</script>
+</body>
+</html>

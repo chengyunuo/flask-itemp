@@ -1,0 +1,10 @@
+[
+{"Hold":"10","Ramp":"0","Waiting":"20"},
+{"Hold":"20","Ramp":"10","Waiting":"10"},
+{"Hold":"30","Ramp":"30","Waiting":"0"},
+{"Hold":"40","Ramp":"0","Waiting":"20"},
+{"Hold":"50","Ramp":"0","Waiting":"10"},
+{"Hold":"60","Ramp":"20","Waiting":"30"},
+{"Hold":"70","Ramp":"10","Waiting":"0"},
+{"Hold":"70","Ramp":"10","Waiting":"0"}
+]

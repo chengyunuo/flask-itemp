@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)graph_echarts.html -->
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="static/libs/css/bootstrap.min.css" rel="stylesheet"><!--主要CSS-->
+    <link href="static/font-awesome/4.5.0/css/font-awesome.min.css?v=4.5.0" rel="stylesheet"><!--字体，图标CSS-->
+    <link href="static/libs/css/custom.css" rel="stylesheet">
+    <link href="static/libs/css/bootstrap-table.min.css" rel="stylesheet"><!--表格CSS-->
+    <link href="static/libs/css/style.min.css" rel="stylesheet"><!--主要CSS-->
+    <style>
+        /*在chrome下移除input[number]的上下箭头*/
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button{
+            -webkit-appearance: none !important;
+            margin: 0;
+        }
+        /*在firefox下移除input[number]的上下箭头*/
+        input[type="number"]{-moz-appearance:textfield;}
+    </style>
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight" style="padding-top:0px;">
+    <div class="row" style="margin:0px -20px;">
+        <div class="col-xs-12 no-padding" style="border-bottom:1px solid #282828; height:60px; margin-bottom:20px;">
+            <div class="col-xs-12" style="padding-top:13px;">
+                <!--play-->
+                <button id='id-button-play' data-toggle="button" class="btn btn-primary btn-outline"
+                        style="color:#fff;border-color: #282828;" type="button">
+                    <i class="fa fa-play"></i>
+                </button>
+                <!--stop-->
+                <button id='id-button-stop' data-toggle="button" class="btn btn-primary btn-outline"
+                        style="color:#fff;border-color: #282828;" type="button">
+                    <i class="fa fa-stop"></i>
+                </button>
+                <!--pause-->
+                <button id='id-button-pause' data-toggle="button" class="btn btn-primary btn-outline"
+                        style="color:#fff;border-color: #282828;" type="button">
+                    <i class="fa fa-pause"></i>
+                </button>
+                <!--设置-->
+                <button id='id-button-config' type="button" class="btn btn-primary btn-outline" data-toggle="modal"
+                        data-target="#myModal2" style="color:#fff;border-color: #282828; float:right">
+                    <i class="fa fa-gear"></i>
+                </button>
+                <!--设置弹出框-->
+                <div class="modal inmodal" id="myModal2" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content animated flipInY">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span
+                                        aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                <h4 class="modal-title" style="font-size:18px; font-weight:100; color:#fff;">设置</h4>
+                            </div>
+                            <div class="modal-body" style="color:#fff;">
+                                <h3>P.I.D Parameters</h3>
+
+                                <div class="row no-margins" style="border-bottom:1px solid #282828;">
+                                    <div class="col-xs-6 no-padding" style="margin-bottom:10px;">
+                                        <button data-toggle="button" class="btn btn-w-m btn-primary btn-outline"
+                                                style="color:#fff;border-color: #282828;" type="button">Read from
+                                            controller
+                                        </button>
+                                    </div>
+                                    <div class="col-xs-6 no-padding" style="margin-bottom:10px;">
+                                        <button data-toggle="button" class="btn btn-w-m btn-primary btn-outline"
+                                                style="color:#fff;border-color: #282828; float:right" type="button">
+                                            Write to controller
+                                        </button>
+                                    </div>
+                                </div>
+                                <h3 style="margin-top:10px;">Calibration Parameters</h3>
+
+                                <div class="row no-margins" style="border-bottom:1px solid #282828;">
+                                    <div class="col-xs-6 no-padding" style="margin-bottom:10px;">
+                                        <button data-toggle="button" class="btn btn-w-m btn-primary btn-outline"
+                                                style="color:#fff;border-color: #282828;" type="button">Read from
+                                            controller
+                                        </button>
+                                    </div>
+                                    <div class="col-xs-6 no-padding" style="margin-bottom:10px;">
+                                        <button data-toggle="button" class="btn btn-w-m btn-primary btn-outline"
+                                                style="color:#fff;border-color: #282828; float:right" type="button">
+                                            Write to controller
+                                        </button>
+                                    </div>
+                                </div>
+                                <h3 style="margin-top:10px;">Other</h3>
+
+                                <div class="row no-margins" style="border-bottom:1px solid #282828;">
+                                    <form method="get" class="form-horizontal">
+                                        <div class="form-group">
+                                            <label class="col-sm-5 control-label">Sampling interval(S)</label>
+
+                                            <div class="col-sm-7">
+                                                <input id='id-input-interval' class="form-control" type="text"
+                                                       style="height:30px; font-size:16px"></div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <h3 style="margin-top:10px;">Information</h3>
+
+                                <div class="row no-margins" style="border-bottom:1px solid #282828;">
+                                    <p>Name：ITEMP SOFT</p>
+
+                                    <p>Serial number: 111111111</p>
+
+                                    <p>Company：Inventech (Shanghai) Co.,Ltd</p>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary btn-outline" data-dismiss="modal"
+                                        style="color:#fff;border-color: #282828;">关闭
+                                </button>
+                                <button id='id-button-submit' type="button" class="btn btn-primary btn-outline" data-dismiss="modal"
+                                        style="color:#fff;border-color: #282828;">确定
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4" style="padding-right:5px">
+            <div class="col-xs-12 no-padding">
+                <div class="panel-body no-padding">
+                    <div class="panel-group" id="version">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <a data-toggle="collapse" data-parent="#version" href="#manual" style="color:#fff;">
+                                    <h5 class="panel-title">手动控制</h5>
+                                </a>
+                            </div>
+                            <div id="manual" class="panel-collapse collapse in">
+                                <div class="panel-body">
+                                    <div class="col-xs-12 no-padding" style="margin-top:20px;">
+                                        <div class="col-xs-9 no-padding">
+                                            <input id='id-input-settemp' type="number" name="username" min="0.01" max="100.00" step="0.01" required class="form-control"
+                                                   placeholder="0.00" required="required" oninput="if(value>300.00)value=300.00;if(value<0)value=0;">
+{#                                            {{ form.set_temp(id='id-input-settemp', class="form-control", placeholder="0.00") }}#}
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <h1>°C</h1>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 no-padding" style="margin-top:20px;">
+                                        <div class="col-xs-9 no-padding">
+                                            <input id='id-input-setramp' class="form-control" type="number" step="0.01" min="0.01" max="100.00"
+                                                   placeholder="0.00" required="required" oninput="if(value>100.00)value=100.00;if(value<0)value=0.01">
+{#                                            {{ form.set_ramp(id='id-input-setramp', class="form-control", placeholder="0.00") }}#}
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <h2>°C/min</h2></div>
+                                    </div>
+                                    <!--
+                                    <div class="col-xs-12 no-padding">
+                                    <div class="checkbox i-checks">
+                                    <label style="padding-left:0px;">
+                                    <input type="checkbox" value="">
+                                    <i></i> cooling
+                                    </label>
+                                    </div>
+                                    </div>
+                                    -->
+                                    <div class="col-xs-12 no-padding" style="margin:10px 0px 10px 0px;">
+                                        <div class="col-xs-6 no-padding">
+                                            <button data-toggle="button" class="btn btn-w-m btn-primary btn-outline"
+                                                    style="color:#fff;border-color: #282828;" type="button">确认
+                                            </button>
+{#                                            {{ form.play(class="btn btn-w-m btn-primary btn-outline", style="color:#fff;border-color: #282828;") }}#}
+                                        </div>
+                                        <div class="col-xs-6 no-padding" style="float:right">
+                                            <button data-toggle="button" class="btn btn-w-m btn-primary btn-outline"
+                                                    style="color:#fff;border-color: #282828;" type="button">默认
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <a data-toggle="collapse" data-parent="#version" href="#program" style="color:#fff;">
+                                    <h5 class="panel-title">程序控制</h5>
+                                </a>
+                            </div>
+                            <div id="program" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <div class="col-sm-12 no-padding" style="margin:10px 0px 10px 0px;">
+                                        <div class="col-xs-4 no-padding">
+                                            <button data-toggle="button" class="btn btn-w-m btn-primary btn-outline"
+                                                    style="color:#fff;border-color: #282828;" type="button">Hold
+                                            </button>
+                                        </div>
+                                        <div class="col-xs-4 no-padding text-center">
+                                            <button data-toggle="button" class="btn btn-w-m btn-primary btn-outline"
+                                                    style="color:#fff;border-color: #282828;" type="button">Ramp
+                                            </button>
+                                        </div>
+                                        <div class="col-xs-4 no-padding">
+                                            <button data-toggle="button" class="btn btn-w-m btn-primary btn-outline"
+                                                    style="color:#fff;border-color: #282828; float:right" type="button">
+                                                Waiting time
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 no-padding" style="margin-bottom:10px;">
+                                        <!--
+                                        <div class="example" style=" height:317px;">
+                                        <table data-toggle="table" data-url="static/hold.json" data-height="287" data-mobile-responsive="true">
+                                        <thead>
+                                        <tr>
+                                        <th data-field="Hold">Hold</th>
+                                        <th data-field="Ramp">Ramp</th>
+                                        <th data-field="Waiting">Waiting time</th></tr>
+                                        </thead>
+                                        </table>
+                                        </div>
+                                        -->
+                                    </div>
+                                    <div class="col-xs-12 no-padding" style="margin:10px 0px 10px 0px;">
+                                        <div class="col-xs-4 no-padding">
+                                            <button data-toggle="button" class="btn btn-w-m btn-primary btn-outline"
+                                                    style="color:#fff;border-color: #282828;" type="button">新建
+                                            </button>
+                                        </div>
+                                        <div class="col-xs-4 no-padding text-center">
+                                            <button data-toggle="button" class="btn btn-w-m btn-primary btn-outline"
+                                                    style="color:#fff;border-color: #282828;" type="button">保存
+                                            </button>
+                                        </div>
+                                        <div class="col-xs-4 no-padding">
+                                            <button data-toggle="button" class="btn btn-w-m btn-primary btn-outline"
+                                                    style="color:#fff;border-color: #282828; float:right" type="button">
+                                                加载
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-8">
+            <div class="col-xs-12 no-padding">
+                <div class="panel-body no-padding">
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5 class="panel-title">温度走势</h5>
+                            </div>
+                            <div class="panel-collapse collapse in">
+                                <div class="panel-body">
+                                    <!--温度趋势图表-->
+                                    <!--为ECharts准备一个具备大小（宽高）的Dom-->
+                                    {#                        <div id="main" style="height:200px;width:400px;border:1px solid #ccc;padding:10px;"></div>#}
+                                    <div id="main" style="height: 500px; width: 100%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5 class="panel-title">当前温度</h5>
+                            </div>
+                            <div class="panel-collapse collapse in">
+                                <div class="panel-body">
+                                    <div class="col-sm-6 no-padding">
+                                        <!--运行-->
+                                        <i class="fa fa-circle" style="color:#2df107; font-size:18px"></i>
+                                        <!--
+                                        停止 <i class="fa fa-circle" style="color:#f00; font-size:18px"></i>
+                                        -->
+                                        <div class="col-sm-12 no-padding">
+                                            <div class="col-sm-7 no-padding">
+                                                <h1 style="font-size:30px; text-align:center; padding-top:20px;">
+                                                    当前温度</h1>
+
+                                                <h1 id="current_temp" style="font-size:45px; text-align:center; padding-top:20px;"></h1>
+                                            </div>
+                                            <div class="col-sm-5">
+                                                <!--温度图表-->
+                                                <div id="main2" style="height: 190px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="col-xs-12 no-padding" style="margin:0px 0px 10px 0px;">
+                                            <div class="col-xs-6 no-padding">
+                                                <button data-toggle="button" class="btn btn-w-m btn-primary btn-outline"
+                                                        style="color:#fff;border-color: #282828;" type="button">保存
+                                                </button>
+                                            </div>
+                                            <div class="col-xs-6 no-padding">
+                                                <button data-toggle="button" class="btn btn-w-m btn-primary btn-outline"
+                                                        style="color:#fff;border-color: #282828; float:right"
+                                                        type="button">读取
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <!--
+                                        <div class="example">
+                                        <table data-toggle="table" data-url="static/Time.json" data-height="180" data-mobile-responsive="true">
+                                        <thead>
+                                        <tr>
+                                        <th data-field="S">事件</th>
+                                        <th data-field="T">温度</th>
+                                        <th data-field="Time">时间</th></tr>
+                                        </thead>
+                                        </table>
+                                        </div>
+                                        -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--主要JS-->
+<script src="static/libs/js/jquery.min.js"></script>
+<script src="static/libs/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.2.0/jquery.js"></script>
+<script type="text/javascript" src="http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+<script type="text/javascript" src="http://cdn.bootcss.com/socket.io/1.5.1/socket.io.min.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/temp.js') }}"></script>
+<!-- ECharts 3 引入 -->
+<script src="http://echarts.baidu.com/dist/echarts.min.js"></script>
+<script src="{{ url_for('static', filename='js/graph.js') }}"></script>
+<script src="{{ url_for('static', filename='js/space.js') }}"></script>
+
+<!--选择框JS-->
+<!-- <script src="static/libs/js/icheck.min.js"></script>
+-->
+<!--表格JS-->
+<!-- <script src="static/libs/js/bootstrap-table.min.js"></script>
+<script src="static/libs/js/bootstrap-table-mobile.min.js"></script>
+<script src="static/libs/js/bootstrap-table-zh-CN.min.js"></script>
+<script src="static/libs/js/bootstrap-table-demo.min.js"></script>
+-->
+<!--图表JS-->
+<!-- <script src="static/libs/js/echarts.min.js"></script>
+<script src="static/libs/js/echarts-all.js"></script>
+-->
+<!--图表脚本-->
+<!-- <script>
+var myChart = echarts.init(document.getElementById('main'),'dark');
+option = {
+tooltip: {
+trigger: 'axis'
+},
+/*
+toolbox: {
+show: true,
+feature: {
+dataZoom: {
+yAxisIndex: 'none'
+},
+dataView: {readOnly: false},
+magicType: {type: ['line', 'bar']},
+restore: {},
+saveAsImage: {}
+}
+},
+*/
+grid: {
+left: '3%',
+top: '15%',
+right: '8%',
+bottom: '0%',
+containLabel: true
+},
+xAxis:  {
+type: 'category',
+boundaryGap: false,
+name:"Time",
+data: ['9:00','10:00','11:00','12:00','13:00','14:00','15:00']
+},
+yAxis: {
+type: 'value',
+name:"Temperature",
+axisLabel: {
+formatter: '{value} °C'
+}
+},
+series: [
+{
+name:'温度走势',
+type:'line',
+data:[30, 35, 32, 36, 40, 42, 45],
+}
+]
+};
+myChart.setOption(option);
+var myChart2 = echarts.init(document.getElementById("main2"),'dark');
+option2 = {
+tooltip : {
+trigger: 'axis',
+axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+},
+formatter: function (params) {
+var tar = params[1];
+return tar.name + '<br/>' + tar.seriesName + ' : ' + tar.value;
+}
+},
+grid: {
+left: '3%',
+right: '4%',
+bottom: '3%',
+containLabel: true
+},
+xAxis: {
+type : 'category',
+splitLine: {show:false},
+data : ['实时监控']
+},
+yAxis: {
+type : 'value',
+name : '°C',
+},
+series: [
+{
+name: '辅助',
+type: 'bar',
+stack:  '总量',
+itemStyle: {
+normal: {
+barBorderColor: 'rgba(0,0,0,0)',
+color: 'rgba(0,0,0,0)'
+},
+emphasis: {
+barBorderColor: 'rgba(0,0,0,0)',
+color: 'rgba(0,0,0,0)'
+}
+}
+},
+{
+name: '当前温度',
+type: 'bar',
+stack: '总量',
+barWidth: 30,
+label: {
+normal: {
+show: true,
+position: 'inside'
+}
+},
+data:[-183.25]
+}
+]
+};
+myChart2.setOption(option2);
+//多图表自适应
+window.onresize = function() {
+myChart.resize();
+}
+</script>
+-->
+<!--选择框脚本-->
+<!-- <script>
+$(document).ready(function () {
+$(".i-checks").iCheck({checkboxClass: "icheckbox_square-green", radioClass: "iradio_square-green",})
+});
+</script>
+-->
+</body>
+
+</html>
