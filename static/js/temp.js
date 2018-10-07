@@ -47,7 +47,6 @@ var bindEventSetTemp = function(){
 }
 
 var __main = function(){
-    log('222')
     bindEventSetTemp()
 }
 
