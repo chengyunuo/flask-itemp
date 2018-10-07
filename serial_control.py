@@ -45,7 +45,26 @@ class Command(object):
 
 
 # 向下位机发送指令，并且得到下位机应答数据
-def serial_send(ser, register_address='0100', fun_code='0103', set_data=0.01):
+def serial_send(ser, send_cmd):
+    # ser.close()
+    # time.sleep(0.1)
+    # cmd_object = Command(register_address=register_address, fun_code=fun_code, set_data=set_data)
+    # cmd = cmd_object.data_parse()
+    # log('cmd', cmd)
+    ser.open()
+    time.sleep(0.1)
+    # 写入串口发送缓冲区
+    ser.write(send_cmd)
+    time.sleep(0.1)
+    # 读取串口接收缓冲区,并把数据转换为bytes
+    data_recv = ser.readall().decode()
+    ser.close()
+    # time.sleep(0.1)
+
+    return data_recv
+
+
+def serial_send1(ser, register_address='0100', fun_code='0103', set_data=0.01):
     ser.close()
     time.sleep(0.1)
     cmd_object = Command(register_address=register_address, fun_code=fun_code, set_data=set_data)
@@ -66,7 +85,8 @@ def serial_send(ser, register_address='0100', fun_code='0103', set_data=0.01):
 
 # 读取温度
 def read_temperature(ser):
-    data_recv = serial_send(ser)
+    send_cmd = b':010301000001FA\r\n'
+    data_recv = serial_send(ser, send_cmd)
     temperature = temp_parse(data_recv)
 
     return temperature

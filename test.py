@@ -37,8 +37,8 @@ def serial_init():
     ser.bytesize = 8
     ser.stopbits = 1
     ser.timeout = 0.2
-    ser.open()
-    time.sleep(0.1)
+    # ser.open()
+    # time.sleep(0.1)
 
     return ser
 
@@ -82,7 +82,19 @@ def serial_init():
 
 
 # 向下位机发送指令，并且得到下位机应答数据
-def serial_send(ser, register_address='0100', fun_code='0103', set_data=0.01):
+def serial_send(ser, send_cmd):
+    ser.open()
+    time.sleep(0.1)
+    # 写入串口发送缓冲区
+    ser.write(send_cmd)
+    time.sleep(0.1)
+    # 读取串口接收缓冲区,并把数据转换为bytes
+    data_recv = ser.readall().decode()
+
+    return data_recv
+
+
+def serial_send1(ser, register_address='0100', fun_code='0103', set_data=0.01):
     cmd_object = Command(register_address=register_address, fun_code=fun_code, set_data=set_data)
     cmd = cmd_object.data_parse()
     # 写入串口发送缓冲区
@@ -154,7 +166,8 @@ def serial_send1(ser, data_send1, data_send2):
 
 # 读取温度
 def read_temp(ser):
-    data_recv = serial_send(ser)
+    send_cmd = b':010301000001FA\r\n'
+    data_recv = serial_send(ser, send_cmd)
     temperature = temp_parse(data_recv)
 
     log('temperature', temperature)

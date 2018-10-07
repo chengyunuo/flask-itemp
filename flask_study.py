@@ -44,12 +44,14 @@ def background_thread():
             # # 格式化接收到的字符串
             # temp = temp_parse(recv_data)
             # temp = read_temperature(ser, data_send1, data_send2)
-            temp = read_temperature(ser)
+            # send_cmd = b':010301000001FA\r\n'
+            current_temperature = read_temperature(ser)
+            # log('current_temperature', current_temperature)
             # temp = read_temperature(ser, data_send)
             # temp = read_cmd(ser)
             # log('receive_data', temp)
             socketio.emit('server_response',
-                          {'data': temp, 'time': t},
+                          {'data': current_temperature, 'time': t},
                           # 注意：这里不需要客户端连接的上下文，默认 broadcast = True ！！！！！！！
                           namespace='/api/current_temp')
             # 延时
