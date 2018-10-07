@@ -33,6 +33,8 @@ def background_thread():
     global ser
     global serial_flag
 
+    send_cmd = b':010301000001FA\r\n'
+
     while True:
         if serial_flag is True:
             # log('flag1', serial_flag)
@@ -44,8 +46,7 @@ def background_thread():
             # # 格式化接收到的字符串
             # temp = temp_parse(recv_data)
             # temp = read_temperature(ser, data_send1, data_send2)
-            # send_cmd = b':010301000001FA\r\n'
-            current_temperature = read_temperature(ser)
+            current_temperature = read_temperature(ser, send_cmd)
             # log('current_temperature', current_temperature)
             # temp = read_temperature(ser, data_send)
             # temp = read_cmd(ser)
@@ -77,6 +78,7 @@ def index():
 def stop_temp():
     global ser
     global serial_flag
+    stop_cmd = b':010608000000f1\r\n'
 
     if serial_flag is True:
         serial_flag = False
@@ -84,7 +86,7 @@ def stop_temp():
         # time.sleep(0.1)
         # stop_temperature(ser)
         while True:
-            status_code = stop_temperature(ser)
+            status_code = stop_temperature(ser, stop_cmd)
             if status_code == '':
                 time.sleep(0.1)
             else:
@@ -94,7 +96,7 @@ def stop_temp():
         # ser.close()
         # time.sleep(0.1)
         while True:
-            status_code = stop_temperature(ser)
+            status_code = stop_temperature(ser, stop_cmd)
             if status_code == '':
                 time.sleep(0.1)
             else:

@@ -84,8 +84,8 @@ def serial_send1(ser, register_address='0100', fun_code='0103', set_data=0.01):
 
 
 # 读取温度
-def read_temperature(ser):
-    send_cmd = b':010301000001FA\r\n'
+def read_temperature(ser, send_cmd):
+    # send_cmd = b':010301000001FA\r\n'
     data_recv = serial_send(ser, send_cmd)
     temperature = temp_parse(data_recv)
 
@@ -95,6 +95,7 @@ def read_temperature(ser):
 # 按照程序段模式设定温度
 def set_temperature(ser, set_temp_value, set_ramp_value):
     # 发送sv命令
+
     sv = serial_send(
         ser,
         register_address='000d',
@@ -123,14 +124,16 @@ def set_temperature(ser, set_temp_value, set_ramp_value):
     return True
 
 
-def stop_temperature(ser):
+def stop_temperature(ser, stop_cmd):
     # 发送程序段停止命令
-    serial_send(
-        ser,
-        register_address='0800',
-        fun_code='0106',
-        set_data=0,
-    )
+    data_recv = serial_send(ser, stop_cmd)
+    # serial_send(
+    #     ser,
+    #     register_address='0800',
+    #     fun_code='0106',
+    #     set_data=0,
+    # )
+    return data_recv
 
 
 # 根据操作系统类型，得出串口名
