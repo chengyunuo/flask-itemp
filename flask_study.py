@@ -110,21 +110,25 @@ def stop_temp():
 def set_temp():
     global ser
     global serial_flag
+    act_recv = b':010608000001f0\r\n'
     set_temp_value = request.json.get('inputTemp')
     set_ramp_value = request.json.get('inputRamp')
     if set_temp_value != '' and set_ramp_value != '':
         set_temp_value = int(set_temp_value)
         set_ramp_value = int(set_ramp_value)
         log(set_temp_value, set_ramp_value)
+
         # set_temperature(ser, set_temp_value, set_ramp_value)
+        sv_cmd = b':0106000d138851\r\n'
+        time_cmd = b':0106000e012cbe\r\n'
         if serial_flag is True:
             serial_flag = False
             # ser.close()
             # time.sleep(0.1)
             # log('ser status', ser.isOpen())
-            log('flag1', serial_flag)
+            # log('flag1', serial_flag)
             while True:
-                status_code = set_temperature(ser, set_temp_value, set_ramp_value)
+                status_code = set_temperature(ser, sv_cmd, time_cmd, act_recv)
                 if status_code == '':
                     time.sleep(0.1)
                 else:
@@ -136,7 +140,7 @@ def set_temp():
             # time.sleep(0.1)
             # set_temperature(ser, set_temp_value, set_ramp_value)
             while True:
-                status_code = set_temperature(ser, set_temp_value, set_ramp_value)
+                status_code = set_temperature(ser, sv_cmd, time_cmd, act_recv)
                 if status_code == '':
                     time.sleep(0.1)
                 else:

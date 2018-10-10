@@ -1,5 +1,7 @@
 from utils import temp_parse
 from utils import log
+from utils import calc_lrc
+from utils import Command
 import serial
 import time
 import os
@@ -93,7 +95,23 @@ def read_temperature(ser, send_cmd):
 
 
 # 按照程序段模式设定温度
-def set_temperature(ser, set_temp_value, set_ramp_value):
+def set_temperature(ser, sv_cmd, time_cmd, act_cmd):
+    # 发送sv命令
+
+    sv_recv = serial_send(ser, sv_cmd)
+    log('sv', sv_recv)
+
+    # 发送time命令
+    time_recv = serial_send(ser, time_cmd)
+    log('time', time_recv)
+    # 发送程序段启动命令
+    act_recv = serial_send(ser, act_cmd)
+    log('act', act_recv)
+
+    return True
+
+
+def set_temperature1(ser, set_temp_value, set_ramp_value):
     # 发送sv命令
 
     sv = serial_send(
