@@ -57,7 +57,8 @@ def serial_send(ser, send_cmd):
     time.sleep(0.1)
     # 写入串口发送缓冲区
     ser.write(send_cmd)
-    time.sleep(0.1)
+    # 延时小于0.2会出现读取到空
+    time.sleep(0.3)
     # 读取串口接收缓冲区,并把数据转换为bytes
     data_recv = ser.readall().decode()
     ser.close()

@@ -47,9 +47,10 @@ var apiSetTemp = function(form, callback) {
 }
 
 // 程序段模式stop温度
-var stopSetTemp = function(callback) {
+var stopSetTemp = function(stop_cmd, callback) {
     var path = '/api/stop_temp'
-    ajax('POST', path, callback)
+
+    ajax('POST', path, stop_cmd, callback)
 }
 
 // 设置配置文件
@@ -63,3 +64,93 @@ var stopSetTemp = function(callback) {
 //    var path = '/api/todo/add'
 //    ajax('POST', path, form, callback)
 //}
+
+//字符转换
+var Hexstring2btye = function (str) {
+    var pos = 0;
+    var len = str.length;
+    if (len % 2 != 0) {
+        return null;
+    }
+    len /= 2;
+    var hexA = new Array();
+    for (var i = 0; i < len; i++) {
+        var s = str.substr(pos, 2);
+        var v = parseInt(s, 16);
+        hexA.push(v);
+        pos += 2;
+    }
+    return hexA;
+}
+
+
+var Bytes2HexString = function (b) {
+    var hexs = "";
+    for (var i = 0; i < b.length; i++) {
+        var hex = b[i].toString(16);
+        if (hex.length == 1) {
+            hex = '0' + hex;
+        }
+        hexs += hex.toUpperCase();
+    }
+    return hexs;
+}
+
+
+var fill = function (num, n) {
+    var len = num.toString().length;
+    while (len < n) {
+        num = "0" + num;
+        len++;
+    }
+    return num;
+}
+
+//解析input数据
+var dataParse = function (data) {
+    //把字符串转换为number，并且取两位小数，再*100
+    data = parseFloat(data).toFixed(2)*100
+    //转换为16进制字符串
+    data = data.toString(16)
+    //字符串不足4位，前面补零
+    data = fill(data, 4)
+
+    return data
+}
+
+//LRC校验计算
+var calLrc = function (e) {
+    var data = Hexstring2btye(e);
+    var b = 0;
+    for (var i of data) {
+        b += i
+        // console.log(data)
+    }
+    var c = ~b + 1
+    var d = c & 0xff
+    data.push(d)
+    // console.log(data)
+
+    var dataLrc = Bytes2HexString(data);
+    // log('dataLrc', dataLrc)
+
+    return dataLrc
+}
+
+var svCmd = function (inputvalue) {
+    var setData = dataParse(inputvalue)
+    var data = '0106000d' + setData
+    data = calLrc(data)
+    data = ':' + data + '\r\n'
+
+    return data
+}
+
+var timeCmd = function (inputvalue) {
+    var setData = dataParse(inputvalue)
+    var data = '0106000e' + setData
+    data = calLrc(data)
+    data = ':' + data + '\r\n'
+
+    return data
+}

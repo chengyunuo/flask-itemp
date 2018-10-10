@@ -18,7 +18,8 @@ async_mode = None
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, async_mode=async_mode)
+# socketio = SocketIO(app, async_mode=async_mode)
+socketio = SocketIO(app)
 ser = serial_init()
 serial_flag = True
 
@@ -34,7 +35,7 @@ def background_thread():
     global serial_flag
 
     send_cmd = b':010301000001FA\r\n'
-
+    # while True:
     while True:
         if serial_flag is True:
             # log('flag1', serial_flag)
@@ -53,7 +54,7 @@ def background_thread():
             # log('receive_data', temp)
             socketio.emit('server_response',
                           {'data': current_temperature, 'time': t},
-                          # 注意：这里不需要客户端连接的上下文，默认 broadcast = True ！！！！！！！
+            # 注意：这里不需要客户端连接的上下文，默认 broadcast = True ！
                           namespace='/api/current_temp')
             # 延时
             socketio.sleep(0.5)
@@ -63,7 +64,7 @@ def background_thread():
     # else:
     #     # 延时
     #     log('flag2', serial_flag)
-    #     time.sleep(0.1)
+    #     time.sleep(0.01)
 
 
 
@@ -71,14 +72,17 @@ def background_thread():
 
 @app.route('/')
 def index():
-    return render_template('index.html', async_mode=socketio.async_mode)
+    return render_template('index.html')
 
 
 @app.route('/api/stop_temp', methods=['GET', 'POST'])
 def stop_temp():
     global ser
     global serial_flag
-    stop_cmd = b':010608000000f1\r\n'
+    stop_cmd = request.json.get('stop_cmd')
+    stop_cmd = stop_cmd.encode()
+    log('stop_cmd', stop_cmd)
+    # stop_cmd = b':010608000000f1\r\n'
 
     if serial_flag is True:
         serial_flag = False
@@ -110,25 +114,34 @@ def stop_temp():
 def set_temp():
     global ser
     global serial_flag
-    act_recv = b':010608000001f0\r\n'
-    set_temp_value = request.json.get('inputTemp')
-    set_ramp_value = request.json.get('inputRamp')
+    # act_recv = b':010608000001f0\r\n'
+    # set_temp_value = request.json.get('inputTemp')
+    set_temp_value = request.json.get('sv')
+    sv_cmd = set_temp_value.encode()
+    log('sv_cmd', sv_cmd)
+    # set_ramp_value = request.json.get('inputRamp')
+    set_ramp_value = request.json.get('time')
+    time_cmd = set_ramp_value.encode()
+    log('time_cmd', time_cmd)
+    act_cmd = request.json.get('act').encode()
+    log('act_cmd', act_cmd)
+
     if set_temp_value != '' and set_ramp_value != '':
-        set_temp_value = int(set_temp_value)
-        set_ramp_value = int(set_ramp_value)
-        log(set_temp_value, set_ramp_value)
+        # set_temp_value = int(set_temp_value)
+        # set_ramp_value = int(set_ramp_value)
+        # log(set_temp_value, set_ramp_value)
 
         # set_temperature(ser, set_temp_value, set_ramp_value)
-        sv_cmd = b':0106000d138851\r\n'
-        time_cmd = b':0106000e012cbe\r\n'
+        # sv_cmd = b':0106000d138851\r\n'
+        # time_cmd = b':0106000e012cbe\r\n'
         if serial_flag is True:
-            serial_flag = False
+            # serial_flag = False
             # ser.close()
             # time.sleep(0.1)
             # log('ser status', ser.isOpen())
             # log('flag1', serial_flag)
             while True:
-                status_code = set_temperature(ser, sv_cmd, time_cmd, act_recv)
+                status_code = set_temperature(ser, sv_cmd, time_cmd, act_cmd)
                 if status_code == '':
                     time.sleep(0.1)
                 else:
@@ -140,7 +153,7 @@ def set_temp():
             # time.sleep(0.1)
             # set_temperature(ser, set_temp_value, set_ramp_value)
             while True:
-                status_code = set_temperature(ser, sv_cmd, time_cmd, act_recv)
+                status_code = set_temperature(ser, sv_cmd, time_cmd, act_cmd)
                 if status_code == '':
                     time.sleep(0.1)
                 else:
@@ -168,35 +181,42 @@ def ws_connect():
         if thread is None:
             thread = socketio.start_background_task(target=background_thread)
 
+    # def background_thread():
+    # global ser
+    # global serial_flag
+    #
+    # send_cmd = b':010301000001FA\r\n'
+    # # # while True:
     # while True:
+    #     socketio.sleep(5)
     #     if serial_flag is True:
-    #         while True:
-    #             log('flag1', serial_flag)
-    #             # if serial_flag is True:
-    #             # 获取系统时间（只取分:秒）
-    #             t = time.strftime('%H:%M:%S', time.localtime())
-    #             # # 接收到的字符串
-    #             # recv_data = ser.serial_cmd(data)
-    #             # # 格式化接收到的字符串
-    #             # temp = temp_parse(recv_data)
-    #             # temp = read_temperature(ser, data_send1, data_send2)
-    #             temp = read_temperature(ser)
-    #             # temp = read_temperature(ser, data_send)
-    #             # temp = read_cmd(ser)
-    #             # log('receive_data', temp)
-    #             socketio.emit('server_response',
-    #                           {'data': temp, 'time': t},
-    #                           # 注意：这里不需要客户端连接的上下文，默认 broadcast = True ！！！！！！！
+    #         # log('flag1', serial_flag)
+    #         # if serial_flag is True:
+    #         # 获取系统时间（只取分:秒）
+    #         t = time.strftime('%H:%M:%S', time.localtime())
+    #         # # 接收到的字符串
+    #         # recv_data = ser.serial_cmd(data)
+    #         # # 格式化接收到的字符串
+    #         # temp = temp_parse(recv_data)
+    #         # temp = read_temperature(ser, data_send1, data_send2)
+    #         current_temperature = read_temperature(ser, send_cmd)
+    #         log('current_temperature', current_temperature)
+    #         # log('current_temperature', current_temperature)
+    #         # temp = read_temperature(ser, data_send)
+    #         # temp = read_cmd(ser)
+    #         # log('receive_data', temp)
+    #         socketio.emit('server_response',
+    #                           {'data': current_temperature, 'time': t},
     #                           namespace='/api/current_temp')
-    #             # 延时
-    #             socketio.sleep(0.5)
-    #         # else:
-    #         #     socketio.sleep(0.5)
-    #         #     continue
-    #     else:
     #         # 延时
-    #         log('flag2', serial_flag)
-    #         time.sleep(0.1)
+    #         socketio.sleep(0.6)
+    #     else:
+    #         socketio.sleep(0.01)
+    #         continue
+    # else:
+    #     # 延时
+    #     log('flag2', serial_flag)
+    #     time.sleep(0.01)
 
 
 if __name__ == '__main__':

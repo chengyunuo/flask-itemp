@@ -45,7 +45,7 @@ def temp_parse(recv_data):
         real_temp = dec_num / 100.00
         return real_temp
     except:
-        log('error')
+        log('error format')
 
 
 # lrc数据验证码计算，所有16进制数相加的值，取反，然后加1

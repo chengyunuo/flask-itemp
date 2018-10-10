@@ -71,6 +71,7 @@ var update_mychart = function (res) { //res是json格式的response对象
     //如果获取到的温度不为空，则把温度加到温度数组中，否则把上一次读取的数据加进去
     // 当前的数据,float类型，保留2位小数
     var current_data = parseFloat(res.data).toFixed(2)
+    log('1111111111')
     temp.innerHTML = current_data
     // log('current_data', current_data)
     // 上次的数据
@@ -128,9 +129,12 @@ myChart.showLoading();
 
 // 建立socket连接，等待服务器“推送”数据，用回调函数更新图表
 $(document).ready(function () {
-    namespace = '/api/current_temp';
+    // var namespace = '/api/current_temp';
+    log(1111)
     var socket = io.connect('http://localhost:5000/api/current_temp');
+    log('socket', socket)
     socket.on('server_response', function (res) {
+        log('22222')
         update_mychart(res);
     });
 });

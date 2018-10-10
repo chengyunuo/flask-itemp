@@ -15,19 +15,29 @@ var bindEventSetTemp = function(){
         var setRamp = e('#id-input-setramp')
         var inputTemp = setTemp.value
         var inputRamp = setRamp.value
+        var sv = svCmd(inputTemp)
+        var time = timeCmd(inputRamp)
+        var act = ':010608000001f0\r\n'
+        log('sv', sv)
         var data = {
-            'inputTemp': inputTemp,
-            'inputRamp': inputRamp,
+            'sv': sv,
+            'time': time,
+            'act': act,
         }
-        apiSetTemp(data, function(r){
+        apiSetTemp(data, function(){
             log('play被点到了')
-            log('inputTemp', inputTemp)
-            log('inputRamp', inputRamp)
+            // log('inputTemp', inputTemp)
+            // log('inputRamp', inputRamp)
         })
     })
+
     stopButton.addEventListener('click', function(){
-        log('stop被点到了')
-        stopSetTemp()
+        var data = {
+            'stop_cmd': ':010608000000f1\r\n',
+        }
+        stopSetTemp(data, function (r) {
+            log('stop被点到了')
+        })
     })
     pauseButton.addEventListener('click', function(){
         log('pause被点到了')
@@ -46,8 +56,25 @@ var bindEventSetTemp = function(){
     // })
 }
 
+var test = function () {
+// 建立socket连接，等待服务器“推送”数据，用回调函数更新图表
+    $(document).ready(function () {
+        namespace = '/api/current_temp';
+        var socket = io.connect('http://localhost:5000/api/current_temp');
+        log(22222)
+        socket.on('server_response', function (res) {
+            log(333333)
+            update_mychart(res);
+        });
+    });
+}
+
 var __main = function(){
     bindEventSetTemp()
+    // var a = "010301000001";
+    // data = calLrc(a)
+    // log(data)
+    // test()
 }
 
 __main()
