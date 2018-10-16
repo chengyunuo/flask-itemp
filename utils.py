@@ -35,7 +35,7 @@ def log(*args, **kwargs):
 
 # 把串口缓冲区接收到的字符串转换成数字型温度值
 def temp_parse(recv_data):
-    # log('recv_data', recv_data)
+    log('recv_data', recv_data)
     # 字符串切片并拼接0x
     try:
         hex_str = '0x' + recv_data[7:11]

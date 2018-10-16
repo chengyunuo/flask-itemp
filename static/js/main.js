@@ -18,7 +18,6 @@ var bindEventSetTemp = function(){
         var sv = svCmd(inputTemp)
         var time = timeCmd(inputRamp)
         var act = ':010608000001f0\r\n'
-        log('sv', sv)
         var data = {
             'sv': sv,
             'time': time,
@@ -35,7 +34,7 @@ var bindEventSetTemp = function(){
         var data = {
             'stop_cmd': ':010608000000f1\r\n',
         }
-        stopSetTemp(data, function (r) {
+        stopSetTemp(data, function () {
             log('stop被点到了')
         })
     })
@@ -61,9 +60,7 @@ var test = function () {
     $(document).ready(function () {
         namespace = '/api/current_temp';
         var socket = io.connect('http://localhost:5000/api/current_temp');
-        log(22222)
         socket.on('server_response', function (res) {
-            log(333333)
             update_mychart(res);
         });
     });
@@ -71,10 +68,6 @@ var test = function () {
 
 var __main = function(){
     bindEventSetTemp()
-    // var a = "010301000001";
-    // data = calLrc(a)
-    // log(data)
-    // test()
 }
 
 __main()

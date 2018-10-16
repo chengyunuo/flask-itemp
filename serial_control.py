@@ -10,17 +10,24 @@ import os
 # 串口初始化
 def serial_init():
     ser = serial.Serial()
+
     ser.port = 'com6'
     ser.baudrate = 19200
     ser.parity = 'N'
     ser.bytesize = 8
     ser.stopbits = 1
     ser.timeout = 0.1
-    # ser.writeTimeout = 0.2
     # ser.open()
     # time.sleep(0.1)
 
     return ser
+
+
+# def serial_open(ser):
+#     ser.open()
+#     time.sleep(0.1)
+#
+#     return True
 
 
 class Command(object):
@@ -48,20 +55,18 @@ class Command(object):
 
 # 向下位机发送指令，并且得到下位机应答数据
 def serial_send(ser, send_cmd):
-    # ser.close()
-    # time.sleep(0.1)
     # cmd_object = Command(register_address=register_address, fun_code=fun_code, set_data=set_data)
     # cmd = cmd_object.data_parse()
     # log('cmd', cmd)
-    ser.open()
-    time.sleep(0.1)
+    # ser.open()
+    # time.sleep(0.1)
     # 写入串口发送缓冲区
     ser.write(send_cmd)
     # 延时小于0.2会出现读取到空
     time.sleep(0.3)
     # 读取串口接收缓冲区,并把数据转换为bytes
     data_recv = ser.readall().decode()
-    ser.close()
+    # ser.close()
     # time.sleep(0.1)
 
     return data_recv
