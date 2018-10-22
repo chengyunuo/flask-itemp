@@ -1,10 +1,14 @@
-from utils import temp_parse
+from utils import data_parse
 from utils import log
 from utils import calc_lrc
-from utils import Command
 import serial
 import time
 import os
+
+# 停止指令，也就是切换到fix模式下
+fix_cmd = ':010608000000f1\r\n'
+# 读取当前温度指令
+read_cmd = ':010301000001FA\r\n'
 
 
 # 串口初始化
@@ -17,40 +21,8 @@ def serial_init():
     ser.bytesize = 8
     ser.stopbits = 1
     ser.timeout = 0.1
-    # ser.open()
-    # time.sleep(0.1)
 
     return ser
-
-
-# def serial_open(ser):
-#     ser.open()
-#     time.sleep(0.1)
-#
-#     return True
-
-
-class Command(object):
-    def __init__(self, fun_code='0103', register_address='0100', set_data=0.01, enter_code='0D0A'):
-        self.fun_code = fun_code
-        self.register_address = register_address
-        self.set_data = set_data
-        self.enter_code = enter_code
-
-    # 数据解析
-    def data_parse(self):
-        temp = int(self.set_data * 100)
-        log('temp', temp)
-        # 温度值解析成16进制字符串'{:0>4}'.format('{:x}'.format(temp))
-        data_format = '{:0>4}'.format('{:x}'.format(temp))
-        log('data_format', data_format)
-        temp = self.fun_code + self.register_address + data_format
-        hex_str = calc_lrc(temp)
-        log('hex_str', hex_str)
-        # 根据控制器文档要求，把指令转换成byte类型并回车
-        byte_data = hex_str.encode() + bytes.fromhex(self.enter_code)
-
-        return byte_data
 
 
 # 向下位机发送指令，并且得到下位机应答数据
@@ -60,104 +32,167 @@ def serial_send(ser, send_cmd):
     # log('cmd', cmd)
     # ser.open()
     # time.sleep(0.1)
-    # 写入串口发送缓冲区
+    # 写入串口发送缓冲区,写入的数据是bytes型
+    send_cmd = send_cmd.encode()
     ser.write(send_cmd)
     # 延时小于0.2会出现读取到空
     time.sleep(0.3)
     # 读取串口接收缓冲区,并把数据转换为bytes
-    data_recv = ser.readall().decode()
+    serial_recv = ser.read_until().decode()
+    # log('serial_recv', serial_recv)
+    # serial_recv = ser.readall().decode()
+    # data_recv = ser.readall()
+    # log('data_recv', type(data_recv))
     # ser.close()
     # time.sleep(0.1)
 
-    return data_recv
+    # 返回bytes字符串
+    return serial_recv
 
 
-def serial_send1(ser, register_address='0100', fun_code='0103', set_data=0.01):
-    ser.close()
-    time.sleep(0.1)
-    cmd_object = Command(register_address=register_address, fun_code=fun_code, set_data=set_data)
-    cmd = cmd_object.data_parse()
-    log('cmd', cmd)
-    ser.open()
-    time.sleep(0.1)
-    # 写入串口发送缓冲区
-    ser.write(cmd)
-    time.sleep(0.2)
-    # 读取串口接收缓冲区,并把数据转换为bytes
-    data_recv = ser.readall().decode()
-    ser.close()
-    time.sleep(0.1)
-
-    return data_recv
+# def serial_send1(ser, register_address='0100', fun_code='0103', set_data=0.01):
+#     ser.close()
+#     time.sleep(0.1)
+#     cmd_object = Command(register_address=register_address, fun_code=fun_code, set_data=set_data)
+#     cmd = cmd_object.data_parse()
+#     log('cmd', cmd)
+#     ser.open()
+#     time.sleep(0.1)
+#     # 写入串口发送缓冲区
+#     ser.write(cmd)
+#     time.sleep(0.2)
+#     # 读取串口接收缓冲区,并把数据转换为bytes
+#     data_recv = ser.readall().decode()
+#     ser.close()
+#     time.sleep(0.1)
+#
+#     return data_recv
 
 
 # 读取温度
-def read_temperature(ser, send_cmd):
-    # send_cmd = b':010301000001FA\r\n'
-    data_recv = serial_send(ser, send_cmd)
-    temperature = temp_parse(data_recv)
+def read_temperature(ser):
+    # read_datas是读取到的返回值 和 解析成int型的温度值
+    # {
+    #     'read_recv': read_recv,
+    #     'temperature': temperature,
+    # }
+    # # 读取当前温度指令
+    # read_cmd = ':010301000001FA\r\n'
+    return_data = {
+        'serial_status': False,
+    }
+    read_recv = serial_send(ser, read_cmd)
+    # 判断是否指令是否发送成功，不成功直接返回False
+    if len(read_recv) == 0:
+        return return_data
+    # 把接收到的字符串解析成温度值（整型）
+    temperature = data_parse(read_recv)
+    # 生成返回值
+    return_data['serial_status'] = True
+    return_data['read_recv'] = read_recv
+    return_data['temperature'] = temperature
 
-    return temperature
-
-
-# 按照程序段模式设定温度
-def set_temperature(ser, sv_cmd, time_cmd, act_cmd):
-    # 发送sv命令
-
-    sv_recv = serial_send(ser, sv_cmd)
-    log('sv', sv_recv)
-
-    # 发送time命令
-    time_recv = serial_send(ser, time_cmd)
-    log('time', time_recv)
-    # 发送程序段启动命令
-    act_recv = serial_send(ser, act_cmd)
-    log('act', act_recv)
-
-    return True
-
-
-def set_temperature1(ser, set_temp_value, set_ramp_value):
-    # 发送sv命令
-
-    sv = serial_send(
-        ser,
-        register_address='000d',
-        fun_code='0106',
-        set_data=set_temp_value,
-    )
-    log('sv', sv)
-
-    # 发送time命令
-    time = serial_send(
-        ser,
-        register_address='000e',
-        fun_code='0106',
-        set_data=set_ramp_value,
-    )
-    log('time', time)
-    # 发送程序段启动命令
-    act = serial_send(
-        ser,
-        register_address='0800',
-        fun_code='0106',
-        set_data=0.01,
-    )
-    log('act', act)
-
-    return True
+    return return_data
 
 
-def stop_temperature(ser, stop_cmd):
+# 设置温度，在程序模式下，程序段1中设置
+def set_temperature(ser, set_cmds):
+    return_data = {
+        'serial_status': False,
+    }
+    # # 切换到fix模式指令
+    # fix_cmd = ':010608000000f1\r\n'
+    # # 发送程序段停止命令
+    # fix_recv = serial_send(ser, fix_cmd)
+    # # 判断是否指令是否发送成功，不成功直接返回False
+    # if len(fix_recv) == 0:
+    #     return return_data
+    for k, v in set_cmds.items():
+        log('v', v)
+        return_data[k] = serial_send(ser, v)
+        log('return_data', return_data)
+        if len(return_data[k]) == 0:
+            return return_data
+    return_data['serial_status'] = True
+
+    return return_data
+
+
+# def set_temperature1(ser, set_temp_value, set_ramp_value):
+#     # 发送sv命令
+#
+#     sv = serial_send(
+#         ser,
+#         register_address='000d',
+#         fun_code='0106',
+#         set_data=set_temp_value,
+#     )
+#     log('sv', sv)
+#
+#     # 发送time命令
+#     time = serial_send(
+#         ser,
+#         register_address='000e',
+#         fun_code='0106',
+#         set_data=set_ramp_value,
+#     )
+#     log('time', time)
+#     # 发送程序段启动命令
+#     act = serial_send(
+#         ser,
+#         register_address='0800',
+#         fun_code='0106',
+#         set_data=0.01,
+#     )
+#     log('act', act)
+#
+#     return True
+
+
+# 停止加热，温度回复到默认sv
+def stop_temperature(ser):
+    return_data = {
+        'serial_status': False,
+    }
+    # # 停止指令，也就是切换到fix模式下
+    # fix_cmd = ':010608000000f1\r\n'
     # 发送程序段停止命令
-    data_recv = serial_send(ser, stop_cmd)
-    # serial_send(
-    #     ser,
-    #     register_address='0800',
-    #     fun_code='0106',
-    #     set_data=0,
-    # )
-    return data_recv
+    fix_recv = serial_send(ser, fix_cmd)
+    # 判断是否指令是否发送成功，不成功直接返回False
+    if len(fix_recv) == 0:
+        return return_data
+    return_data['serial_status'] = True
+
+    return return_data
+
+
+# 暂停加热，切换到模式，并且把当前温度设置为sv
+def pause_temperature(ser):
+    return_data = {
+        'serial_status': False,
+    }
+    # # 切换到fix模式指令
+    # fix_cmd = ':010608000000f1\r\n'
+    # # 读取当前温度指令
+    # read_cmd = ':010301000001FA\r\n'
+    read_datas = read_temperature(ser)
+    if read_datas['serial_status'] is False:
+        return return_data
+    # 先把系统从程序模式切换到fix模式，然后再把读取的温度进行解析
+    fix_recv = serial_send(ser, fix_cmd)
+    if len(fix_recv) == 0:
+        return return_data
+    # 解析读取的温度为fix模式sv指令
+    parse_temperature = read_datas.get('read_recv')
+    temp = '01060101' + parse_temperature[7:11]
+    sv_cmd = calc_lrc(temp)
+    # 设置sv为当前温度
+    sv_recv = serial_send(ser, sv_cmd)
+    if len(sv_recv) == 0:
+        return return_data
+    return_data['serial_status'] = True
+
+    return return_data
 
 
 # 根据操作系统类型，得出串口名
@@ -173,157 +208,5 @@ def serial_name():
     return name
 
 
-# lrc数据验证码计算，所有16进制数相加的值，取反，然后加1
-def calc_lrc(hex_str):
-    input_byte = bytes.fromhex(hex_str)
-    # print('hex_str', hex_str)
-    lrc = 0
-    # byte数组
-    message = bytearray(input_byte)
-    log('message', message)
-    # 所有16进制数相加
-    for b in message:
-        lrc += b
-    #   取反
-    lrc ^= 0xff
-    lrc += 1
-    # 取低8位
-    lrc &= 0xff
-    log('lrc {:x}', lrc)
-    # lrc取低8位
-    data = '{:0>2}'.format('{:x}'.format(lrc))
-    log('data', data)
-    lrc_data = ':' + hex_str + data
-    log('lrc_data', lrc_data)
-
-    return lrc_data
-
-
-# # 向下位机控制器发送指令，并且得到下位机应答数据
-# def serial_send1(ser, data_send1, data_send2):
-#     # 组装要发送的命令
-#     data_send1 = data_send1.encode()
-#     data_send2 = bytes.fromhex(data_send2)
-#     data_send = data_send1 + data_send2
-#     # 打开串口
-#     ser.open()
-#     # 很重要的延时，判断是串口打开需要一些时间
-#     time.sleep(0.1)
-#     # 写入串口发送缓冲区
-#     # ser.write(data_send1)
-#     # ser.write(data_send2)
-#     ser.write(data_send)
-#     # 延时
-#     time.sleep(0.1)
-#     # 读取串口接收缓冲区,并把数据转换为bytes
-#     data_recv = ser.readall().decode()
-#     # log('data_recv', data_recv)
-#     # 清空串口接收缓冲区
-#     ser.flushInput()
-#     # 清空串口发送缓冲区
-#     ser.flushOutput()
-#     # 关闭串口
-#     ser.close()
-#
-#     return data_recv
-#
-#
-# # 读取温度
-# def read_temperature1(ser, data_send1, data_send2):
-#     recv = serial_send(ser, data_send1, data_send2)
-#     try:
-#         real_temp = temp_parse(recv)
-#     except:
-#         real_temp = 25.0
-#         ser.close()
-#     # finally:
-#     #     print(real_temp)
-#
-#     return real_temp
-#
-#
-# # 得到发送数据
-# def send_parse(data):
-#     temp = int(data * 100)
-#     print('temp1', temp)
-#     # 温度值解析成16进制字符串'{:0>4}'.format('{:x}'.format(temp))
-#     temp = '01060101' + '{:0>4}'.format('{:x}'.format(temp))
-#     print('temp2', temp)
-#     hex_str = calc_lrc(temp)
-#
-#     return hex_str
-
-
-# 把串口缓冲区接收到的字符串转换成数字型温度值
-# def temp_parse(recv_data):
-#     # 字符串切片并拼接0x
-#     hex_str = '0x' + recv_data[7:11]
-#     # 把字符串转成16进制
-#     dec_num = int(hex_str, 16)
-#     # 根据协议生成实际温度值,温度数据除以100即为实际温度值
-#     real_temp = dec_num / 100.00
-#     return real_temp
-
-
-# # 数据解析
-# def data_parse(register_addr='0100', set_data=0.01, fun_code='0103', enter_code='0D0A'):
-#     temp = int(set_data * 100)
-#     # print('temp1', temp)
-#     # 温度值解析成16进制字符串'{:0>4}'.format('{:x}'.format(temp))
-#     temp = fun_code + register_addr + '{:0>4}'.format('{:x}'.format(temp))
-#     # print('temp2', temp)
-#     hex_str = calc_lrc(temp)
-#     # 根据控制器文档要求，把指令转换成byte类型并回车
-#     byte_data = hex_str.encode() + bytes.fromhex(enter_code)
-#     # log(byte_data)
-#
-#     return byte_data
-#
-#
-# # 程序段方式设定温度，取程序段1，设置sv为50C，1388
-# def set_temperature1(ser, sv, ramp):
-#     # temp = int(sv * 100)
-#     # print('temp1', temp)
-#     # temp = '01060101' + '{:0>4}'.format('{:x}'.format(temp))
-#     # print('temp2', temp)
-#     # data1 = calc_lrc(temp)
-#     data1 = send_parse(sv)
-#     log(data1)
-#     # data1 = ':010601010bb8'
-#     data2 = '0D0A'
-#     recv = serial_send(ser, data1, data2)
-#     return recv
-#
-#
-# # 设定温度，设置sv为50C，1388
-# def set_temperature1(ser, sv):
-#     # temp = int(sv * 100)
-#     # print('temp1', temp)
-#     # temp = '01060101' + '{:0>4}'.format('{:x}'.format(temp))
-#     # print('temp2', temp)
-#     # data1 = calc_lrc(temp)
-#     data1 = send_parse(sv)
-#     # data1 = ':010601010bb8'
-#     data2 = '0D0A'
-#     recv = serial_send(ser, data1, data2)
-#     return recv
-
-
-
-
-
 if __name__ == "__main__":
     pass
-    # ser = serial_init()
-#
-#     # 一次设置有可能不会成功
-#     # set_temp(40.00)
-#     # 多次设置
-#     # for i in range(6):
-#     #     set_temp(30.00)
-#     multi_set(30.00)
-#     prog_parse('000d', 50)
-#     data_parse()
-    # data_parse(register_addr='000d', set_data=50, fun_code='0106')
-
-

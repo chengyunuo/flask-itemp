@@ -31,6 +31,7 @@ var ajax = function(method, path, data, reseponseCallback) {
         if(r.readyState === 4) {
             // r.response 存的就是服务器发过来的放在 HTTP BODY 中的数据
             reseponseCallback(r.response)
+            log(r.response)
         }
     }
     // 把数据转换为 json 格式字符串

@@ -1,13 +1,9 @@
-import time
 from threading import Lock
-from flask import Flask, render_template, session, request, url_for
-from flask_socketio import SocketIO, emit
-# from serial_control1 import SerialControl
+from flask import Flask, render_template, request
+from flask import jsonify
+from flask_socketio import SocketIO
 from serial_control import *
 from utils import log
-from utils import temp_parse
-# from flask import g
-
 
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
@@ -17,13 +13,11 @@ async_mode = None
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)
-# 串口初始化，并且打开串口
+# 串口初始化
 ser = serial_init()
-# log('ser111111', ser.isOpen())
+# 打开串口
 ser.open()
 time.sleep(0.1)
-# log('ser444444', ser.isOpen())
-serial_flag = True
 
 # 初始化线程
 thread = None
@@ -34,31 +28,32 @@ thread_lock = Lock()
 def background_thread():
     """Example of how to send server generated events to clients."""
     global ser
-    global serial_flag
 
-    send_cmd = b':010301000001FA\r\n'
-    # while True:
+    # send_cmd = ':010301000001FA\r\n'
     while True:
         # 串口一直打开的方式
         # 获取系统时间（只取分:秒）
         t = time.strftime('%H:%M:%S', time.localtime())
-        # # 接收到的字符串
-        # recv_data = ser.serial_cmd(data)
-        # # 格式化接收到的字符串
-        # temp = temp_parse(recv_data)
-        # temp = read_temperature(ser, data_send1, data_send2)
-        current_temperature = read_temperature(ser, send_cmd)
-        log('current_temperature', current_temperature)
-        # temp = read_temperature(ser, data_send)
-        # temp = read_cmd(ser)
-        # log('receive_data', temp)
+        # 接收到的数据
+        read_datas = read_temperature(ser)
+        current_temperature = read_datas.get('temperature')
+
         socketio.emit('server_response',
                       {'data': current_temperature, 'time': t},
-                      # 注意：这里不需要客户端连接的上下文，默认 broadcast = True ！
+                      # 注意：这里不需要客户端连接的上下文，默认 broadcast = True
                       namespace='/api/current_temp')
         # 延时
         socketio.sleep(0.5)
 
+        # recv_data = ser.serial_cmd(data)
+        # # 格式化接收到的字符串
+        # temp = temp_parse(recv_data)
+        # temp = read_temperature(ser, data_send1, data_send2)
+
+        # log('current_temperature', current_temperature)
+        # temp = read_temperature(ser, data_send)
+        # temp = read_cmd(ser)
+        # log('receive_data', temp)
 
         # 串口每次打开关闭的方式
         # if serial_flag is True:
@@ -97,13 +92,16 @@ def index():
 @app.route('/api/stop_temp', methods=['GET', 'POST'])
 def stop_temp():
     global ser
-    global serial_flag
-    stop_cmd = request.json.get('stop_cmd')
-    stop_cmd = stop_cmd.encode()
-    log('stop_cmd', stop_cmd)
+
+    stop_return = stop_temperature(ser)
+    log('stop_return', stop_return)
+
+    return jsonify(stop_return)
+    # 从浏览器获取到的数据是字符串的
+    # stop_cmd = request.json.get('stop_cmd')
+    # stop_cmd = stop_cmd.encode()
     # stop_cmd = b':010608000000f1\r\n'
     # 串口一直打开的方式
-    stop_temperature(ser, stop_cmd)
 
     # 串口每次打开关闭的方式
     # if serial_flag is True:
@@ -127,27 +125,47 @@ def stop_temp():
     #             break
     #     serial_flag = True
     # stop_temperature(ser)
-    return 'ok'
+
+
+@app.route('/api/pause_temp', methods=['GET', 'POST'])
+def pause_temp():
+    global ser
+
+    pause_return = pause_temperature(ser)
+    log('pause_return', pause_return)
+
+    return jsonify(pause_return)
+
+    # 从浏览器获取到的数据是字符串的
+    # stop_cmd = request.json.get('stop_cmd')
+
+
+    # 串口一直打开的方式
+    # cmd_status = stop_temperature(ser, stop_cmd)
+    # log('cmd_status', cmd_status)
 
 
 @app.route('/api/set_temp', methods=['GET', 'POST'])
 def set_temp():
     global ser
-    global serial_flag
-    # act_recv = b':010608000001f0\r\n'
-    # set_temp_value = request.json.get('inputTemp')
-    set_temp_value = request.json.get('sv')
-    sv_cmd = set_temp_value.encode()
-    log('sv_cmd', sv_cmd)
-    # set_ramp_value = request.json.get('inputRamp')
-    set_ramp_value = request.json.get('time')
-    time_cmd = set_ramp_value.encode()
-    log('time_cmd', time_cmd)
-    act_cmd = request.json.get('act').encode()
-    log('act_cmd', act_cmd)
+
+    require_cmds = ['deact_cmd', 'sv_cmd', 'time_cmd', 'act_cmd']
+    set_cmds = {}
+    for require_cmd in require_cmds:
+        set_cmds[require_cmd] = request.json.get(require_cmd)
+    # sv_cmd = request.json.get('sv')
+    # set_cmds['sv_cmd'] = sv_cmd
+    # time_cmd = request.json.get('time')
+    # set_cmds['time_cmd'] = time_cmd
+    # act_cmd = request.json.get('act')
+    # set_cmds['act_cmd'] = act_cmd
+    log('set_cmds', set_cmds)
 
     # 串口一直打开的方式
-    set_temperature(ser, sv_cmd, time_cmd, act_cmd)
+    set_return = set_temperature(ser, set_cmds)
+    log('set_return', set_return)
+
+    return jsonify(set_return)
     # 串口每次打开关闭的方式
     # if set_temp_value != '' and set_ramp_value != '':
     #     # set_temp_value = int(set_temp_value)
@@ -187,7 +205,6 @@ def set_temp():
     #     log(set_ramp_value)
     # else:
     #     log('oooo')
-    return 'ok'
 
 
 @app.route('/api/set_config', methods=['GET', 'POST'])
@@ -206,6 +223,4 @@ def ws_connect():
 
 
 if __name__ == '__main__':
-
-
     socketio.run(app, host='0.0.0.0')
