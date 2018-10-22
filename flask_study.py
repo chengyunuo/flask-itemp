@@ -1,6 +1,7 @@
 from threading import Lock
 from flask import Flask, render_template, request
 from flask import jsonify
+from flask_cors import CORS
 from flask_socketio import SocketIO
 from serial_control import *
 from utils import log
@@ -12,6 +13,8 @@ async_mode = None
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
+# r'/*' 是通配符，让本服务器所有的 URL 都允许跨域请求
+CORS(app, resources=r'/*')
 socketio = SocketIO(app, async_mode=async_mode)
 # 串口初始化
 ser = serial_init()
