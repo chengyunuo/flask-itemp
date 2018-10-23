@@ -5,22 +5,29 @@ import serial
 import time
 import os
 
-# 停止指令，也就是切换到fix模式下
-fix_cmd = ':010608000000f1\r\n'
-# 读取当前温度指令
-read_cmd = ':010301000001FA\r\n'
+# # 停止指令，也就是切换到fix模式下
+# fix_cmd = ':010608000000f1\r\n'
+# # 读取当前温度指令
+# read_cmd = ':010301000001FA\r\n'
 
 
 # 串口初始化
 def serial_init():
-    ser = serial.Serial()
+    try:
+        ser = serial.Serial()
 
-    ser.port = 'com6'
-    ser.baudrate = 19200
-    ser.parity = 'N'
-    ser.bytesize = 8
-    ser.stopbits = 1
-    ser.timeout = 0.1
+        ser.port = 'com6'
+        ser.baudrate = 19200
+        ser.parity = 'N'
+        ser.bytesize = 8
+        ser.stopbits = 1
+        ser.timeout = 0.1
+
+        # 打开串口
+        ser.open()
+        time.sleep(0.1)
+    except:
+        print(123456)
 
     return ser
 
@@ -70,7 +77,7 @@ def serial_send(ser, send_cmd):
 
 
 # 读取温度
-def read_temperature(ser):
+def read_temperature(ser, read_cmds):
     # read_datas是读取到的返回值 和 解析成int型的温度值
     # {
     #     'read_recv': read_recv,
@@ -78,10 +85,12 @@ def read_temperature(ser):
     # }
     # # 读取当前温度指令
     # read_cmd = ':010301000001FA\r\n'
+    # read_cmds = kwargs
+
     return_data = {
         'serial_status': False,
     }
-    read_recv = serial_send(ser, read_cmd)
+    read_recv = serial_send(ser, read_cmds['read_cmd'])
     # 判断是否指令是否发送成功，不成功直接返回False
     if len(read_recv) == 0:
         return return_data
@@ -96,7 +105,9 @@ def read_temperature(ser):
 
 
 # 设置温度，在程序模式下，程序段1中设置
+# def set_temperature(ser, set_cmds):
 def set_temperature(ser, set_cmds):
+    # set_cmds = kwargs
     return_data = {
         'serial_status': False,
     }
@@ -104,7 +115,7 @@ def set_temperature(ser, set_cmds):
     # fix_cmd = ':010608000000f1\r\n'
     # # 发送程序段停止命令
     # fix_recv = serial_send(ser, fix_cmd)
-    # # 判断是否指令是否发送成功，不成功直接返回False
+    # # 判断指令是否发送成功，不成功直接返回False
     # if len(fix_recv) == 0:
     #     return return_data
     for k, v in set_cmds.items():
@@ -118,46 +129,15 @@ def set_temperature(ser, set_cmds):
     return return_data
 
 
-# def set_temperature1(ser, set_temp_value, set_ramp_value):
-#     # 发送sv命令
-#
-#     sv = serial_send(
-#         ser,
-#         register_address='000d',
-#         fun_code='0106',
-#         set_data=set_temp_value,
-#     )
-#     log('sv', sv)
-#
-#     # 发送time命令
-#     time = serial_send(
-#         ser,
-#         register_address='000e',
-#         fun_code='0106',
-#         set_data=set_ramp_value,
-#     )
-#     log('time', time)
-#     # 发送程序段启动命令
-#     act = serial_send(
-#         ser,
-#         register_address='0800',
-#         fun_code='0106',
-#         set_data=0.01,
-#     )
-#     log('act', act)
-#
-#     return True
-
-
 # 停止加热，温度回复到默认sv
-def stop_temperature(ser):
+def stop_temperature(ser, stop_cmds):
     return_data = {
         'serial_status': False,
     }
     # # 停止指令，也就是切换到fix模式下
     # fix_cmd = ':010608000000f1\r\n'
     # 发送程序段停止命令
-    fix_recv = serial_send(ser, fix_cmd)
+    fix_recv = serial_send(ser, stop_cmds['fix_cmd'])
     # 判断是否指令是否发送成功，不成功直接返回False
     if len(fix_recv) == 0:
         return return_data
@@ -167,7 +147,7 @@ def stop_temperature(ser):
 
 
 # 暂停加热，切换到模式，并且把当前温度设置为sv
-def pause_temperature(ser):
+def pause_temperature(ser, pause_cmds):
     return_data = {
         'serial_status': False,
     }
@@ -175,11 +155,11 @@ def pause_temperature(ser):
     # fix_cmd = ':010608000000f1\r\n'
     # # 读取当前温度指令
     # read_cmd = ':010301000001FA\r\n'
-    read_datas = read_temperature(ser)
+    read_datas = read_temperature(ser, pause_cmds)
     if read_datas['serial_status'] is False:
         return return_data
     # 先把系统从程序模式切换到fix模式，然后再把读取的温度进行解析
-    fix_recv = serial_send(ser, fix_cmd)
+    fix_recv = serial_send(ser, pause_cmds['fix_cmd'])
     if len(fix_recv) == 0:
         return return_data
     # 解析读取的温度为fix模式sv指令

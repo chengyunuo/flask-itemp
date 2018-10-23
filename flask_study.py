@@ -6,6 +6,7 @@ from flask_socketio import SocketIO
 from serial_control import *
 from utils import log
 
+
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
 # the best option based on installed packages.
@@ -18,9 +19,7 @@ CORS(app, resources=r'/*')
 socketio = SocketIO(app, async_mode=async_mode)
 # 串口初始化
 ser = serial_init()
-# 打开串口
-ser.open()
-time.sleep(0.1)
+
 
 # 初始化线程
 thread = None
@@ -33,12 +32,17 @@ def background_thread():
     global ser
 
     # send_cmd = ':010301000001FA\r\n'
+    # 读取当前温度指令
+    read_cmd = ':010301000001FA\r\n'
+    read_cmds = dict(
+        read_cmd=read_cmd,
+    )
     while True:
         # 串口一直打开的方式
         # 获取系统时间（只取分:秒）
         t = time.strftime('%H:%M:%S', time.localtime())
         # 接收到的数据
-        read_datas = read_temperature(ser)
+        read_datas = read_temperature(ser, read_cmds)
         current_temperature = read_datas.get('temperature')
 
         socketio.emit('server_response',
@@ -96,7 +100,14 @@ def index():
 def stop_temp():
     global ser
 
-    stop_return = stop_temperature(ser)
+    stop_cmds = request.json
+    # stop_cmds = dict(
+    #     fix_cmd=fix_cmd,
+    #
+    # )
+    # log('stop_cmds', stop_cmds)
+
+    stop_return = stop_temperature(ser, stop_cmds)
     log('stop_return', stop_return)
 
     return jsonify(stop_return)
@@ -134,7 +145,14 @@ def stop_temp():
 def pause_temp():
     global ser
 
-    pause_return = pause_temperature(ser)
+    pause_cmds = request.json
+    # log('pause_cmds', pause_cmds)
+    # pause_cmds = dict(
+    #     fix_cmd=fix_cmd,
+    #     read_cmd=read_cmd,
+    # )
+
+    pause_return = pause_temperature(ser, pause_cmds)
     log('pause_return', pause_return)
 
     return jsonify(pause_return)
@@ -151,11 +169,13 @@ def pause_temp():
 @app.route('/api/set_temp', methods=['GET', 'POST'])
 def set_temp():
     global ser
-
-    require_cmds = ['deact_cmd', 'sv_cmd', 'time_cmd', 'act_cmd']
-    set_cmds = {}
-    for require_cmd in require_cmds:
-        set_cmds[require_cmd] = request.json.get(require_cmd)
+    set_cmds = request.json
+    # log('request.json', request.json)
+    #
+    # require_cmds = ['deact_cmd', 'sv_cmd', 'time_cmd', 'act_cmd']
+    # set_cmds = {}
+    # for require_cmd in require_cmds:
+    #     set_cmds[require_cmd] = request.json.get(require_cmd)
     # sv_cmd = request.json.get('sv')
     # set_cmds['sv_cmd'] = sv_cmd
     # time_cmd = request.json.get('time')
@@ -220,6 +240,8 @@ def set_config():
 @socketio.on('connect', namespace='/api/current_temp')
 def ws_connect():
     global thread
+
+
     with thread_lock:
         if thread is None:
             thread = socketio.start_background_task(target=background_thread)

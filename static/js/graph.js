@@ -124,7 +124,7 @@ var update_mychart = function (res) { //res是json格式的response对象
     myChart.setOption(option1);
 }
 // 首次显示加载动画
-myChart.showLoading();
+// myChart.showLoading();
 
 // 建立socket连接，等待服务器“推送”数据，用回调函数更新图表
 $(document).ready(function () {
