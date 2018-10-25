@@ -43,7 +43,7 @@ def serial_send(ser, send_cmd):
     send_cmd = send_cmd.encode()
     ser.write(send_cmd)
     # 延时小于0.2会出现读取到空
-    time.sleep(0.3)
+    time.sleep(0.2)
     # 读取串口接收缓冲区,并把数据转换为bytes
     serial_recv = ser.read_until().decode()
     # log('serial_recv', serial_recv)
@@ -108,6 +108,7 @@ def read_temperature(ser, read_cmds):
 # def set_temperature(ser, set_cmds):
 def set_temperature(ser, set_cmds):
     # set_cmds = kwargs
+    count = 0
     return_data = {
         'serial_status': False,
     }
@@ -119,9 +120,10 @@ def set_temperature(ser, set_cmds):
     # if len(fix_recv) == 0:
     #     return return_data
     for k, v in set_cmds.items():
-        log('v', v)
+        log('v', count, v)
+        count += 1
         return_data[k] = serial_send(ser, v)
-        log('return_data', return_data)
+        log('return_data', return_data[k])
         if len(return_data[k]) == 0:
             return return_data
     return_data['serial_status'] = True

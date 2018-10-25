@@ -50,7 +50,7 @@ def background_thread():
                       # 注意：这里不需要客户端连接的上下文，默认 broadcast = True
                       namespace='/api/current_temp')
         # 延时
-        socketio.sleep(0.5)
+        socketio.sleep(0.8)
 
         # recv_data = ser.serial_cmd(data)
         # # 格式化接收到的字符串
@@ -105,7 +105,7 @@ def stop_temp():
     #     fix_cmd=fix_cmd,
     #
     # )
-    # log('stop_cmds', stop_cmds)
+    log('stop_cmds', stop_cmds)
 
     stop_return = stop_temperature(ser, stop_cmds)
     log('stop_return', stop_return)
@@ -240,7 +240,6 @@ def set_config():
 @socketio.on('connect', namespace='/api/current_temp')
 def ws_connect():
     global thread
-
 
     with thread_lock:
         if thread is None:

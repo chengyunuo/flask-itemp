@@ -138,9 +138,9 @@ var calLrc = function (e) {
     return dataLrc
 }
 
-var svCmd = function (inputvalue) {
+var svCmd = function (segment, inputvalue) {
     var setData = dataParse(inputvalue)
-    var data = '0106000d' + setData
+    var data = segment + setData
     data = calLrc(data)
     data = ':' + data + '\r\n'
 

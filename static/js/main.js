@@ -19,15 +19,33 @@ var bindEventSetTemp = function(){
         var inputTemp = setTemp.value
         var inputRamp = setRamp.value
         var deact_cmd = ':010608000000f1\r\n'
-        var sv_cmd = svCmd(inputTemp)
-        var time_cmd = timeCmd(inputRamp)
+        //程序段1，time不等于0，out不等于0
+        var sv_cmd1 = svCmd('0106000d', inputTemp)
+        log('sv_cmd1', sv_cmd1)
+        var time_cmd1 = timeCmd(inputRamp)
+        var out_cmd1 = svCmd('0106000f', 1)
+        log('out_cmd1', out_cmd1)
+        //程序段2，time=0，out不等于0
+        var sv_cmd2 = svCmd('01060010', inputTemp)
+        log('sv_cmd2', sv_cmd2)
+        var time_cmd2 = ':010600110000e8\r\n'
+        var out_cmd2 = svCmd('01060012', 1)
+        log('out_cmd2', out_cmd2)
+
+
         var act_cmd = ':010608000001f0\r\n'
         var setCmds = {
             'deact_cmd': deact_cmd,
-            'sv_cmd': sv_cmd,
-            'time_cmd': time_cmd,
+            'sv_cmd1': sv_cmd1,
+            'time_cmd1': time_cmd1,
+            'out_cmd1': out_cmd1,
             'act_cmd': act_cmd,
+            'sv_cmd2': sv_cmd2,
+            'time_cmd2': time_cmd2,
+            'out_cmd2': out_cmd2,
         }
+        // log('setCmds', setCmds)
+
 
         $.ajax({
             url: 'api/set_temp',
