@@ -70,7 +70,7 @@ var update_mychart = function (res) { //res是json格式的response对象
     //time.push(res.data[0]);
     //如果获取到的温度不为空，则把温度加到温度数组中，否则把上一次读取的数据加进去
     // 当前的数据,float类型，保留2位小数
-    var current_data = parseFloat(res.data).toFixed(2)
+    var current_data = parseFloat(res.data).toFixed(3)
     temp.innerHTML = current_data
     // log('current_data', current_data)
     // 上次的数据

@@ -31,7 +31,7 @@ def log(*args, **kwargs):
     print(dt, *args, **kwargs)
 
 
-# 把串口缓冲区接收到的字符串转换成数字型温度值
+# 把串口缓冲区接收到的字符串转换成数字型温度值,16为控制器
 def data_parse(recv_data):
     # 字符串切片并拼接0x
     try:
@@ -40,6 +40,20 @@ def data_parse(recv_data):
         dec_num = int(hex_str, 16)
         # 根据协议生成实际温度值,温度数据除以100即为实际温度值
         real_temp = dec_num / 100.00
+        return real_temp
+    except:
+        log('error format')
+
+
+# 把串口缓冲区接收到的字符串转换成数字型温度值,32为控制器
+def data_parse32(recv_data):
+    # 字符串切片并拼接0x
+    try:
+        hex_str = '0x' + recv_data[7:15]
+        # 把字符串转成16进制
+        dec_num = int(hex_str, 16)
+        # 根据协议生成实际温度值,温度数据除以100即为实际温度值
+        real_temp = dec_num / 1000.00
         return real_temp
     except:
         log('error format')
@@ -68,7 +82,7 @@ def calc_lrc(hex_str):
     # 组合成可以发送到串口的bytes字符串
     lrc_data = ':' + hex_str + data + '\r\n'
     # bytes_lrc_data = lrc_data.encode()
-    log('lrc_data', lrc_data)
+    # log('lrc_data', lrc_data)
     #
     return lrc_data
 

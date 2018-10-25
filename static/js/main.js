@@ -18,22 +18,42 @@ var bindEventSetTemp = function(){
         var setRamp = e('#id-input-setramp')
         var inputTemp = setTemp.value
         var inputRamp = setRamp.value
-        var deact_cmd = ':010608000000f1\r\n'
+
+        //16位控制器对应的数据
+        // var deact_cmd = ':010608000000f1\r\n'
+        // //程序段1，time不等于0，out不等于0
+        // var sv_cmd1 = svCmd('0106000d', inputTemp)
+        // // log('sv_cmd1', sv_cmd1)
+        // var time_cmd1 = timeCmd(inputRamp)
+        // var out_cmd1 = svCmd('0106000f', 1)
+        // // log('out_cmd1', out_cmd1)
+        // //程序段2，time=0，out不等于0
+        // var sv_cmd2 = svCmd('01060010', inputTemp)
+        // // log('sv_cmd2', sv_cmd2)
+        // var time_cmd2 = ':010600110000e8\r\n'
+        // var out_cmd2 = svCmd('01060012', 1)
+        // // log('out_cmd2', out_cmd2)
+        // var act_cmd = ':010608000001f0\r\n'
+
+        //32位控制器对应的数据
+        var deact_cmd = ':0110080000020400000000e1\r\n'
         //程序段1，time不等于0，out不等于0
-        var sv_cmd1 = svCmd('0106000d', inputTemp)
-        log('sv_cmd1', sv_cmd1)
-        var time_cmd1 = timeCmd(inputRamp)
-        var out_cmd1 = svCmd('0106000f', 1)
-        log('out_cmd1', out_cmd1)
+        var sv_cmd1 = svCmd('0110000d000204', inputTemp)
+        // log('sv_cmd1', sv_cmd1)
+        // var time_cmd1 = timeCmd(inputRamp)
+        var time_cmd1 = timeCmd('0110000e000204', inputRamp)
+        var out_cmd1 = ':0110000F00020400000001D9\n\n'
+        // log('out_cmd1', out_cmd1)
         //程序段2，time=0，out不等于0
-        var sv_cmd2 = svCmd('01060010', inputTemp)
-        log('sv_cmd2', sv_cmd2)
-        var time_cmd2 = ':010600110000e8\r\n'
-        var out_cmd2 = svCmd('01060012', 1)
-        log('out_cmd2', out_cmd2)
+        var sv_cmd2 = svCmd('01100010000204', inputTemp)
+        // log('sv_cmd2', sv_cmd2)
+        var time_cmd2 = timeCmd('01100011000204', 0)
+        var out_cmd2 = ':0110001200020400000001D6\n\n'
+        // log('out_cmd2', out_cmd2)
+        var act_cmd = ':0110080000020400000001e0\r\n'
 
 
-        var act_cmd = ':010608000001f0\r\n'
+
         var setCmds = {
             'deact_cmd': deact_cmd,
             'sv_cmd1': sv_cmd1,
@@ -44,7 +64,7 @@ var bindEventSetTemp = function(){
             'time_cmd2': time_cmd2,
             'out_cmd2': out_cmd2,
         }
-        // log('setCmds', setCmds)
+        log('setCmds', setCmds)
 
 
         $.ajax({
@@ -54,7 +74,7 @@ var bindEventSetTemp = function(){
             contentType:'application/json; charset=UTF-8',
             dataType:'json',//希望服务器返回json格式的数据
             success: function (data) {
-                log('set_data', data);
+                // log('set_data', data);
             }
         });
     });

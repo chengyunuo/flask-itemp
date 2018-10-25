@@ -107,7 +107,7 @@ var fill = function (num, n) {
     return num;
 }
 
-//解析input数据
+//解析input数据16位控制器
 var dataParse = function (data) {
     //把字符串转换为number，并且取两位小数，再*100
     data = parseFloat(data).toFixed(2)*100
@@ -115,6 +115,34 @@ var dataParse = function (data) {
     data = data.toString(16)
     //字符串不足4位，前面补零
     data = fill(data, 4)
+
+    return data
+}
+
+//解析input数据32位控制器
+var sv_dataParse32 = function (data) {
+    //把字符串转换为number，并且取两位小数，再*1000,转为整数
+    data = parseFloat(data).toFixed(3)*1000
+
+    //转换为16进制字符串
+    data = data.toString(16)
+    //字符串不足4位，前面补零
+    data = fill(data, 8)
+    log('data', data)
+
+    return data
+}
+
+//解析input数据32位控制器
+var time_dataParse32 = function (data) {
+    //把字符串转换为number，并且取两位小数，再*100，转为整数
+    data = parseFloat(data).toFixed(2)*100
+
+    //转换为16进制字符串
+    data = data.toString(16)
+    //字符串不足4位，前面补零
+    data = fill(data, 8)
+    log('data', data)
 
     return data
 }
@@ -139,7 +167,7 @@ var calLrc = function (e) {
 }
 
 var svCmd = function (segment, inputvalue) {
-    var setData = dataParse(inputvalue)
+    var setData = sv_dataParse32(inputvalue)
     var data = segment + setData
     data = calLrc(data)
     data = ':' + data + '\r\n'
@@ -147,9 +175,9 @@ var svCmd = function (segment, inputvalue) {
     return data
 }
 
-var timeCmd = function (inputvalue) {
-    var setData = dataParse(inputvalue)
-    var data = '0106000e' + setData
+var timeCmd = function (segment, inputvalue) {
+    var setData = time_dataParse32(inputvalue)
+    var data = segment + setData
     data = calLrc(data)
     data = ':' + data + '\r\n'
 

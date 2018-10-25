@@ -25,15 +25,23 @@ ser = serial_init()
 thread = None
 thread_lock = Lock()
 
+# 控制器类型
+controller_type = 32
+
 
 # 后台线程 产生数据，即刻推送至前端
 def background_thread():
     """Example of how to send server generated events to clients."""
     global ser
 
-    # send_cmd = ':010301000001FA\r\n'
-    # 读取当前温度指令
-    read_cmd = ':010301000001FA\r\n'
+    # 根据控制器类型确定读取的指令
+    if controller_type == 32:
+        # 读取当前温度指令，32为控制器
+        read_cmd = ':010301000002F9\r\n'
+    else:
+        # 读取当前温度指令，16为控制器
+        read_cmd = ':010301000001FA\r\n'
+
     read_cmds = dict(
         read_cmd=read_cmd,
     )
@@ -44,13 +52,14 @@ def background_thread():
         # 接收到的数据
         read_datas = read_temperature(ser, read_cmds)
         current_temperature = read_datas.get('temperature')
+        # log('current_temperature', current_temperature)
 
         socketio.emit('server_response',
                       {'data': current_temperature, 'time': t},
                       # 注意：这里不需要客户端连接的上下文，默认 broadcast = True
                       namespace='/api/current_temp')
         # 延时
-        socketio.sleep(0.8)
+        socketio.sleep(0.5)
 
         # recv_data = ser.serial_cmd(data)
         # # 格式化接收到的字符串
@@ -105,7 +114,7 @@ def stop_temp():
     #     fix_cmd=fix_cmd,
     #
     # )
-    log('stop_cmds', stop_cmds)
+    # log('stop_cmds', stop_cmds)
 
     stop_return = stop_temperature(ser, stop_cmds)
     log('stop_return', stop_return)
@@ -146,6 +155,7 @@ def pause_temp():
     global ser
 
     pause_cmds = request.json
+
     # log('pause_cmds', pause_cmds)
     # pause_cmds = dict(
     #     fix_cmd=fix_cmd,
