@@ -128,7 +128,6 @@ var sv_dataParse32 = function (data) {
     data = data.toString(16)
     //字符串不足4位，前面补零
     data = fill(data, 8)
-    log('data', data)
 
     return data
 }
@@ -142,7 +141,6 @@ var time_dataParse32 = function (data) {
     data = data.toString(16)
     //字符串不足4位，前面补零
     data = fill(data, 8)
-    log('data', data)
 
     return data
 }

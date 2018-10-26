@@ -36,33 +36,37 @@ var bindEventSetTemp = function(){
         // var act_cmd = ':010608000001f0\r\n'
 
         //32位控制器对应的数据
-        var deact_cmd = ':0110080000020400000000e1\r\n'
-        //程序段1，time不等于0，out不等于0
-        var sv_cmd1 = svCmd('0110000d000204', inputTemp)
-        // log('sv_cmd1', sv_cmd1)
-        // var time_cmd1 = timeCmd(inputRamp)
-        var time_cmd1 = timeCmd('0110000e000204', inputRamp)
-        var out_cmd1 = ':0110000F00020400000001D9\n\n'
-        // log('out_cmd1', out_cmd1)
-        //程序段2，time=0，out不等于0
-        var sv_cmd2 = svCmd('01100010000204', inputTemp)
-        // log('sv_cmd2', sv_cmd2)
-        var time_cmd2 = timeCmd('01100011000204', 0)
-        var out_cmd2 = ':0110001200020400000001D6\n\n'
-        // log('out_cmd2', out_cmd2)
-        var act_cmd = ':0110080000020400000001e0\r\n'
+        // var deact_cmd = ':0110080000020400000000e1\r\n'
+        // //程序段1，time不等于0，out不等于0
+        // var sv_cmd1 = svCmd('0110000d000204', inputTemp)
+        // // log('sv_cmd1', sv_cmd1)
+        // // var time_cmd1 = timeCmd(inputRamp)
+        // var time_cmd1 = timeCmd('0110000e000204', inputRamp)
+        // var out_cmd1 = ':0110000F00020400000001D9\n\n'
+        // // log('out_cmd1', out_cmd1)
+        // //程序段2，time=0，out不等于0
+        // var sv_cmd2 = svCmd('01100010000204', inputTemp)
+        // // log('sv_cmd2', sv_cmd2)
+        // var time_cmd2 = timeCmd('01100011000204', 0)
+        // var out_cmd2 = ':0110001200020400000001D6\n\n'
+        // // log('out_cmd2', out_cmd2)
+        // var act_cmd = ':0110080000020400000001e0\r\n'
+
+
+        //暂时版本
+        sv_cmd1 = svCmd('01100101000204', inputTemp)
 
 
 
         var setCmds = {
-            'deact_cmd': deact_cmd,
+            // 'deact_cmd': deact_cmd,
             'sv_cmd1': sv_cmd1,
-            'time_cmd1': time_cmd1,
-            'out_cmd1': out_cmd1,
-            'act_cmd': act_cmd,
-            'sv_cmd2': sv_cmd2,
-            'time_cmd2': time_cmd2,
-            'out_cmd2': out_cmd2,
+            // 'time_cmd1': time_cmd1,
+            // 'out_cmd1': out_cmd1,
+            // 'act_cmd': act_cmd,
+            // 'sv_cmd2': sv_cmd2,
+            // 'time_cmd2': time_cmd2,
+            // 'out_cmd2': out_cmd2,
         }
         log('setCmds', setCmds)
 
@@ -81,7 +85,8 @@ var bindEventSetTemp = function(){
     //停止按钮事件
     stopButton.on('click', function(){
         var stopCmds = {
-            'fix_cmd': ':010608000000f1\r\n',
+            // 'fix_cmd': ':0110080000020400000000e1\r\n',
+            'fix_cmd': ':011001910002040000000057\r\n',
         }
 
         $.ajax({
